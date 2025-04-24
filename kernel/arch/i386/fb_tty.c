@@ -6,7 +6,7 @@
 #include <tty.h>
 #include <stdio.h>
 
-static uint32_t* FB_ADDR;	//Voir pour rendre ça compatible avec le
+static char* FB_ADDR;	//Voir pour rendre ça compatible avec le
 				//fait que l'on peut nous donner un bpp
 				//différent de 32.
 static uint32_t FB_PITCH;
@@ -24,12 +24,22 @@ static uint8_t FB_BLUE_FIELDPOS;
 static uint8_t FB_BLUE_MASKSIZE;
 
 
-void read_multiboot_struct (void * multiboot_struct) {
-	static uint32_t struct_size = multiboot_struct[0];
+typedef struct color {
+	uint8_t r;
+	uint8_t g;
+	uint8_t b;
+}
+
+
+void read_multiboot_struct (char* multiboot_struct) {
+	//impossible de faire de l'arithmétique de pointeurs avec void*,
+	//utiliser char* à la place et faire du typecast pour récup les bonnes
+	//valeurs. Normalement c'est bon dans cette fontion
+	static uint32_t struct_size = *(uint32_t*)multiboot_struct;
 	uint32_t index = 8;
 	
-	while ( index < stuct_size && uint32_t multiboot_struct[index] != 8 ) {
-		index = index + uint32_t multiboot_struct[index + 4];
+	while ( index < stuct_size && *(uint32_t*) (multiboot_struct + index) != 8 ) {
+		index = index + *(uint32_t*) (multiboot_struct + index + 4);
 	};
 
 	if ( index >= struct_size ) {
@@ -38,10 +48,10 @@ void read_multiboot_struct (void * multiboot_struct) {
 				multiboot structure,\n now hanging...");
 		while true ;};
 
-	FB_ADDR = (uint32_t*) multiboot_struct[index + 8];
-	FB_PITCH = multiboot_struct[index + 16];
-       	FB_WIDTH = multiboot_struct[index + 20];
-	FB_HEIGHT = multiboot_struct[index + 24];
+	FB_ADDR = *(uint32_t**) (multiboot_struct + index + 8);
+	FB_PITCH = *(uint32_t*) (multiboot_struct + index + 16);
+       	FB_WIDTH = *(uint32_t*) (multiboot_struct + index + 20);
+	FB_HEIGHT = *(uint32_t*) (multiboot_struct + index + 24);
 	FB_BPP = multiboot_struct[index + 28] >> 3;
 	FB_TYPE = multiboot_struct[index + 29];
 
@@ -57,15 +67,33 @@ void read_multiboot_struct (void * multiboot_struct) {
 }
 
 void put_pixel (uint32_t x, uint32_t y, uint32_t r, uint32_t g, uint32_t b) {
-	uint32_t location = y * FB_PITCH + x * FB_BPP;
+	uint32_t location = y * FB_PITCH + x * FB_BPP; 
 	uint32_t red_masked = r & ((1 << FB_RED_MASKSIZE) - 1);
-	uint32_t green_masked = r & ((1 << FB_GREEN_MASKSIZE) - 1); 
-	uint32_t blue_masked = r & ((1 << FB_BLUE_MASKSIZE) - 1);
+	uint32_t green_masked = g & ((1 << FB_GREEN_MASKSIZE) - 1); 
+	uint32_t blue_masked = b & ((1 << FB_BLUE_MASKSIZE) - 1);
 	uint32_t color = (red_masked << FB_RED_FIELDPOS) | 
 		(green_masked << FB_GREEN_FIELDPOS) |
 		(blue_masked << FB_BLUE_FIELDPOS);
 
-	FB_ADDR[location] = color;
+	*(uint32_t*)(FB_ADDR + location) = color;	//Tel qu'écrit, comme FB_ADDR est un pointeur vers uint32_t,
+					//les offsets sont exprimés en long (donc un offset de 1 fait 4 octets)
 }
 
+void fillrect (uint32_t x, uint32_t y, uint32_t w, uint32_t h, 
+		uint32_t r, uint32_t g, uint32_t b) {
+	char* base = FB_ADDR + (y * FB_PITCH + x * FB_BPP); 
+	uint32_t red_masked = r & ((1 << FB_RED_MASKSIZE) - 1);
+	uint32_t green_masked = g & ((1 << FB_GREEN_MASKSIZE) - 1); 
+	uint32_t blue_masked = b & ((1 << FB_BLUE_MASKSIZE) - 1);
+	uint32_t color = (red_masked << FB_RED_FIELDPOS) | 
+		(green_masked << FB_GREEN_FIELDPOS) |
+		(blue_masked << FB_BLUE_FIELDPOS);
 
+	uint32_t i;
+	uint32_t j;
+	for (i = 0, i < h * FB_PICTH, i = i + FB_PITCH) {
+		for (j = 0, j < W * FB_BPP, j = j + FB_BPP) {
+			* (uint32_t*)(base + i + j) = color;	//mm commentaire que pour put_pixel
+		};
+	};
+}	
