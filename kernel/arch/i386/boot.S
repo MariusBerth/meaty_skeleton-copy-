@@ -1,7 +1,8 @@
 # Declare constants for the multiboot header.
 .set MAGIC,    0xE85250D6       # 'magic number' lets bootloader find the header
 .set ARCH,     0		# number determining the architecture for the os, 0 for i386 protected mode
-.set HDR_LNGTH 44		# total length of the header
+.set HDR_LNGTH, multiboot_end - multiboot_begin		
+				# total length of the header
 .set CHECKSUM, -(MAGIC + ARCH + HDR_LNGTH) # checksum of above, to prove we are multiboot
 
 # Tag to ask GRUB for a framebuffer
@@ -20,19 +21,23 @@
 # Declare a header as in the Multiboot Standard.
 .section .multiboot
 .align 4
+multiboot_begin:
 .long MAGIC
 .long ARCH
-.long HDR_LNGTH
-.long CHECKSUM
+.long HDR_LNGTH	#multiboot_end - multiboot_begin
+.long CHECKSUM 	#-(MAGIC + ARCH + multiboot_end - multiboot_begin)
+.align 8
 .word FB_TYPE 			# start of the framebuffer tag
 .word FB_FLAGS
 .long FB_SIZE
 .long FB_WIDTH
 .long FB_HEIGHT
 .long FB_DEPTH
+.align 8
 .word ET_TYPE 			# start of the end tag
 .word ET_FLAGS
 .long ET_SIZE
+multiboot_end:
 
 # Reserve a stack for the initial thread.
 .section .bss
@@ -47,6 +52,7 @@ stack_top:
 .type _start, @function
 _start:
 	movl $stack_top, %esp
+	push %ebx
 
 	# Call the global constructors.
 	call _init

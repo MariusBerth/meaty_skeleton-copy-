@@ -1,8 +1,8 @@
 #include <stdio.h>
 
-#include <kernel/tty.h>
+#include <kernel/fb_tty.h>
 
-void kernel_main(void) {
-	terminal_initialize();
-	printf("Hello, kernel World!\n\n\n\ncoucou");
+void kernel_main(char* multiboot_struct) {
+	framebuffer_initialize(multiboot_struct);
+	fillrect(0, 0, 20, 20, 255, 255, 255);
 }

@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <tty.h>
+#include <kernel/tty.h>
 #include <stdio.h>
 
 static char* FB_ADDR;	//Voir pour rendre ça compatible avec le
@@ -19,36 +19,36 @@ static uint8_t FB_TYPE;
 static uint8_t FB_RED_FIELDPOS;	//TODO: rendre possible l'interprétattion
 static uint8_t FB_RED_MASKSIZE;	//des autres types de couleurs
 static uint8_t FB_GREEN_FIELDPOS;
-static uint8_t FB_GREEN_MASKSIZE;
-static uint8_t FB_BLUE_FIELDPOS;
-static uint8_t FB_BLUE_MASKSIZE;
+static uint8_t FB_GREEN_MASKSIZE = 4;
+static uint8_t FB_BLUE_FIELDPOS = 4;
+static uint8_t FB_BLUE_MASKSIZE = 4;
 
 
-typedef struct color {
+/*typedef struct color {
 	uint8_t r;
 	uint8_t g;
 	uint8_t b;
-}
+};*/
 
 
 void read_multiboot_struct (char* multiboot_struct) {
 	//impossible de faire de l'arithmétique de pointeurs avec void*,
 	//utiliser char* à la place et faire du typecast pour récup les bonnes
 	//valeurs. Normalement c'est bon dans cette fontion
-	static uint32_t struct_size = *(uint32_t*)multiboot_struct;
+	const uint32_t struct_size = *(uint32_t*)multiboot_struct;
 	uint32_t index = 8;
 	
-	while ( index < stuct_size && *(uint32_t*) (multiboot_struct + index) != 8 ) {
+	while ( index < struct_size && *(uint32_t*) (multiboot_struct + index) != 8 ) {
 		index = index + *(uint32_t*) (multiboot_struct + index + 4);
 	};
 
 	if ( index >= struct_size ) {
-		terminal_initialise ();
-		printf("Couldn't find any info relative to the framebuffer in the
+		terminal_initialize ();
+		printf("Couldn't find any info relative to the framebuffer in the\
 				multiboot structure,\n now hanging...");
-		while true ;};
+		while (true) ;};
 
-	FB_ADDR = *(uint32_t**) (multiboot_struct + index + 8);
+	FB_ADDR = *(char**) (multiboot_struct + index + 8);
 	FB_PITCH = *(uint32_t*) (multiboot_struct + index + 16);
        	FB_WIDTH = *(uint32_t*) (multiboot_struct + index + 20);
 	FB_HEIGHT = *(uint32_t*) (multiboot_struct + index + 24);
@@ -68,9 +68,9 @@ void read_multiboot_struct (char* multiboot_struct) {
 
 void put_pixel (uint32_t x, uint32_t y, uint32_t r, uint32_t g, uint32_t b) {
 	uint32_t location = y * FB_PITCH + x * FB_BPP; 
-	uint32_t red_masked = r & ((1 << FB_RED_MASKSIZE) - 1);
-	uint32_t green_masked = g & ((1 << FB_GREEN_MASKSIZE) - 1); 
-	uint32_t blue_masked = b & ((1 << FB_BLUE_MASKSIZE) - 1);
+	uint32_t red_masked = r ;//& ((1 << FB_RED_MASKSIZE) - 1);
+	uint32_t green_masked = g;// & ((1 << FB_GREEN_MASKSIZE) - 1); 
+	uint32_t blue_masked = b;// & ((1 << FB_BLUE_MASKSIZE) - 1);
 	uint32_t color = (red_masked << FB_RED_FIELDPOS) | 
 		(green_masked << FB_GREEN_FIELDPOS) |
 		(blue_masked << FB_BLUE_FIELDPOS);
@@ -79,9 +79,10 @@ void put_pixel (uint32_t x, uint32_t y, uint32_t r, uint32_t g, uint32_t b) {
 					//les offsets sont exprimés en long (donc un offset de 1 fait 4 octets)
 }
 
-void fillrect (uint32_t x, uint32_t y, uint32_t w, uint32_t h, 
+void fillrect (uint32_t x, uint32_t y, const uint32_t w, const uint32_t h, 
 		uint32_t r, uint32_t g, uint32_t b) {
-	char* base = FB_ADDR + (y * FB_PITCH + x * FB_BPP); 
+	char* pos = FB_ADDR + (y * FB_PITCH + x * FB_BPP); 
+	char* linebeg = pos;
 	uint32_t red_masked = r & ((1 << FB_RED_MASKSIZE) - 1);
 	uint32_t green_masked = g & ((1 << FB_GREEN_MASKSIZE) - 1); 
 	uint32_t blue_masked = b & ((1 << FB_BLUE_MASKSIZE) - 1);
@@ -91,9 +92,17 @@ void fillrect (uint32_t x, uint32_t y, uint32_t w, uint32_t h,
 
 	uint32_t i;
 	uint32_t j;
-	for (i = 0, i < h * FB_PICTH, i = i + FB_PITCH) {
-		for (j = 0, j < W * FB_BPP, j = j + FB_BPP) {
-			* (uint32_t*)(base + i + j) = color;	//mm commentaire que pour put_pixel
+	for (i = 0; i < h && i + y < FB_HEIGHT; i++) {
+		for (j = 0; j < w && j + x < FB_WIDTH; j++) {
+			*(uint32_t*) pos = color;	//mm commentaire que pour put_pixel
+			pos += FB_BPP;
 		};
+		linebeg += FB_PITCH;
+		pos = linebeg;
 	};
 }	
+
+void framebuffer_initialize (char* multiboot_struct) {
+	read_multiboot_struct (multiboot_struct);
+	fillrect (0, 0, FB_WIDTH, FB_HEIGHT, 255, 255, 255);
+}
