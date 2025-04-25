@@ -40,6 +40,7 @@ void read_multiboot_struct (char* multiboot_struct) {
 	
 	while ( index < struct_size && *(uint32_t*) (multiboot_struct + index) != 8 ) {
 		index = index + *(uint32_t*) (multiboot_struct + index + 4);
+		index = (uint32_t) (index + (8 - 1)) & -8;
 	};
 
 	if ( index >= struct_size ) {
