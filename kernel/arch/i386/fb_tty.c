@@ -105,5 +105,5 @@ void fillrect (uint32_t x, uint32_t y, const uint32_t w, const uint32_t h,
 
 void framebuffer_initialize (char* multiboot_struct) {
 	read_multiboot_struct (multiboot_struct);
-	fillrect (0, 0, FB_WIDTH, FB_HEIGHT, 255, 255, 255);
+	fillrect (0, 0, FB_WIDTH, FB_HEIGHT, 0, 0, 0);
 }
