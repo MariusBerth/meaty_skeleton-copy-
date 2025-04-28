@@ -56,8 +56,11 @@ void read_multiboot_struct (char* multiboot_struct) {
 	FB_BPP = multiboot_struct[index + 28] >> 3;
 	FB_TYPE = multiboot_struct[index + 29];
 
-	uint32_t col_info = index + 32;		//Ca semble étrange, les infos de couleurs devraient être
-						//à la position index+31 mais ça marche avec index+32
+	uint32_t col_info = index + 32;		//La spec multiboot2 n'est pas réspéctée par GRUB, 
+						//les infos de couleurs devraient être
+						//à la position index+31 mais le champ réservé situé juste avant
+						//est un uint16 dans l'implémentation de GRUB alors que c'est un
+						//uint8 dans la spécification
 	if (FB_TYPE == 1) {
 		FB_RED_FIELDPOS = *(uint8_t*) (multiboot_struct + col_info);
                 FB_RED_MASKSIZE = *(uint8_t*) (multiboot_struct + col_info + 1);	
