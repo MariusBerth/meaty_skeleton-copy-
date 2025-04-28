@@ -4,5 +4,6 @@
 
 void kernel_main(char* multiboot_struct) {
 	framebuffer_initialize(multiboot_struct);
-	fillrect(512, 320, 20, 20, 0xFF, 0xFF, 0xFF);
+	fillrect(512, 320, 20, 20, FB_BLUE);
+	fb_putchar (0,0,FB_WHITE,'a');
 }
