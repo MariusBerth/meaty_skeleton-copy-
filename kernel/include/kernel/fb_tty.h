@@ -18,7 +18,7 @@ void put_pixel (uint32_t x, uint32_t y, uint32_t truecolor);
 void fillrect (uint32_t x, uint32_t y, const uint32_t w, const uint32_t h,
 		struct color color_bytes);
 
-void fb_putchar (uint32_t x, uint32_t y, struct color color, 
+void fb_putentryat (uint32_t x, uint32_t y, struct color color, 
 		unsigned char c);
 
 #endif

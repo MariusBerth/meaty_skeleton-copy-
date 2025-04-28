@@ -121,7 +121,7 @@ void fillrect (uint32_t x, uint32_t y, const uint32_t w, const uint32_t h,
 	};
 }	
 
-void fb_putchar (uint32_t x, uint32_t y, struct color color, unsigned char c) {
+void fb_putentryat (uint32_t x, uint32_t y, struct color color, unsigned char c) {
 	/*char* pos = FB_ADDR + (y * FB_PITCH + x * FB_BPP);
 	char* linebeg = pos;*/
 	c = c & 0x7F; 		//Masquage car les caractères ascii sont codés sur 7 bits
