@@ -48,6 +48,15 @@ uint32_t get_color ( struct color color ) {
 		(blue_masked << FB_BLUE_FIELDPOS);
 }
 
+
+static uint32_t fb_term_row;
+static uint32_t FB_MAX_ROW;
+static uint32_t fb_term_column;
+static uint32_t FB_MAX_COLUMN;
+static struct color fb_font_color;
+static struct color fb_bg_color;
+
+
 void read_multiboot_struct (char* multiboot_struct) {
 	//impossible de faire de l'arithmétique de pointeurs avec void*,
 	//utiliser char* à la place et faire du typecast pour récup les bonnes
@@ -69,7 +78,9 @@ void read_multiboot_struct (char* multiboot_struct) {
 	FB_ADDR = *(char**) (multiboot_struct + index + 8);
 	FB_PITCH = *(uint32_t*) (multiboot_struct + index + 16);
        	FB_WIDTH = *(uint32_t*) (multiboot_struct + index + 20);
+	FB_MAX_COLUMN = FB_WIDTH >> 3;
 	FB_HEIGHT = *(uint32_t*) (multiboot_struct + index + 24);
+	FB_MAX_ROW = FB_WIDTH >> 4;
 	FB_BPP = multiboot_struct[index + 28] >> 3;
 	FB_TYPE = multiboot_struct[index + 29];
 
@@ -121,11 +132,18 @@ void fillrect (uint32_t x, uint32_t y, const uint32_t w, const uint32_t h,
 	};
 }	
 
-void fb_putentryat (uint32_t x, uint32_t y, struct color color, unsigned char c) {
+void fb_terminal_setup (void) {
+	fb_term_row = 0;
+	fb_term_column = 0;
+	fb_font_color = FB_WHITE;
+	fb_bg_color = FB_BLACK;
+}
+
+void fb_putentryat (uint32_t x, uint32_t y, struct color color, char c) {
 	/*char* pos = FB_ADDR + (y * FB_PITCH + x * FB_BPP);
 	char* linebeg = pos;*/
 	c = c & 0x7F; 		//Masquage car les caractères ascii sont codés sur 7 bits
-	unsigned char* code = font8x16[c];
+	unsigned char* code = font8x16[(unsigned char) c];
 	uint32_t truecolor = get_color (color);
 
 	uint32_t i;
@@ -142,6 +160,73 @@ void fb_putentryat (uint32_t x, uint32_t y, struct color color, unsigned char c)
 		//linebeg += FB_PITCH
 	};
 }
+
+void fb_scroll (void) {
+	uint32_t x;
+	uint32_t y;
+	uint32_t pos = 0;
+	uint32_t linebeg = 0;
+	uint32_t offset = 16 * FB_PITCH;
+
+	for (x = 0; x < FB_HEIGHT - 16; x++) {
+		for (y = 0; y < FB_WIDTH; y++) {
+			*(uint32_t*) (FB_ADDR + pos) = 
+				*(uint32_t*) (FB_ADDR + pos + offset);
+			pos += FB_BPP;
+		};
+		linebeg += FB_PITCH;
+		pos = linebeg;
+	};
+
+	fillrect (FB_HEIGHT - 16, 0, FB_WIDTH, 16, fb_bg_color);
+}
+
+void fb_putchar (char c) {
+	if (c != '\n') {
+		fb_putentryat (fb_term_column << 3, fb_term_row << 4, fb_font_color,
+				c);
+	};
+	if (++fb_term_column == FB_MAX_COLUMN || c == '\n') {
+		fb_term_column = 0;
+		if (++fb_term_row == FB_MAX_ROW) {
+			fb_scroll ();
+			--fb_term_row;
+		};
+	};
+}
+
+void fb_write (char* str, size_t size) {
+	for (size_t i = 0; i < size; i++) {
+	       fb_putchar (str[i]);
+	};
+}
+
+void fb_writeat (char* str, size_t size, uint32_t x, uint32_t y,
+	       	struct color color) {
+	for (uint32_t i = 0; i < size; i++) {
+		if (x + 8 >= FB_WIDTH) {
+			x = 0;
+			if (y + 16 >= FB_HEIGHT) {
+				y = 0;
+			};
+		};
+		fb_putentryat (x, y, color, str[i]);
+		x += 8;
+	};
+}
+
+			       
+
+
+void fb_writestring (char* str) {
+	unsigned char data = *str;
+
+	for (; data != 0x00; str++) {
+		fb_putchar (data);
+		data = *str;
+	};
+}
+
 
 void framebuffer_initialize (char* multiboot_struct) {
 	read_multiboot_struct (multiboot_struct);

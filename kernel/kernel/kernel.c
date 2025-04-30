@@ -5,5 +5,7 @@
 void kernel_main(char* multiboot_struct) {
 	framebuffer_initialize(multiboot_struct);
 	fillrect(512, 320, 20, 20, FB_BLUE);
-	fb_putentryat (0,0,FB_WHITE,'a');
+	fb_terminal_setup ();
+	fb_writestring ("coucou,\nceci est le Veldos");
+	fb_writeat ("blergh", 6, 512, 320, FB_RED);
 }
