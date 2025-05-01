@@ -221,8 +221,9 @@ void fb_writeat (char* str, size_t size, uint32_t x, uint32_t y,
 void fb_writestring (char* str) {
 	unsigned char data = *str;
 
-	for (; data != 0x00; str++) {
+	while (data != 0x00) {
 		fb_putchar (data);
+		str ++;
 		data = *str;
 	};
 }
