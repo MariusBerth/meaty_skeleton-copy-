@@ -80,7 +80,7 @@ void read_multiboot_struct (char* multiboot_struct) {
        	FB_WIDTH = *(uint32_t*) (multiboot_struct + index + 20);
 	FB_MAX_COLUMN = FB_WIDTH >> 3;
 	FB_HEIGHT = *(uint32_t*) (multiboot_struct + index + 24);
-	FB_MAX_ROW = FB_WIDTH >> 4;
+	FB_MAX_ROW = FB_HEIGHT >> 4;
 	FB_BPP = multiboot_struct[index + 28] >> 3;
 	FB_TYPE = multiboot_struct[index + 29];
 
@@ -178,7 +178,7 @@ void fb_scroll (void) {
 		pos = linebeg;
 	};
 
-	fillrect (FB_HEIGHT - 16, 0, FB_WIDTH, 16, fb_bg_color);
+	fillrect (0, FB_HEIGHT-16, FB_WIDTH, 16, fb_bg_color);
 }
 
 void fb_putchar (char c) {
@@ -221,8 +221,9 @@ void fb_writeat (char* str, size_t size, uint32_t x, uint32_t y,
 void fb_writestring (char* str) {
 	unsigned char data = *str;
 
-	for (; data != 0x00; str++) {
+	while (data != 0x00) {
 		fb_putchar (data);
+		str ++;
 		data = *str;
 	};
 }
