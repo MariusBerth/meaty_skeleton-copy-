@@ -1,6 +1,7 @@
 #include "keyboard.h"
 //#define KEYBD		(uint8_t*) 0x60	/* I/O port for keyboard data */
 
+//https://wiki.osdev.org/Inline_Assembly/Examples#INx
 static inline uint8_t inb(uint16_t port)
 {
     uint8_t ret;
@@ -23,4 +24,11 @@ uint8_t keyboard_read(void)
   if (0x80 & lu)
     {lu=keyboard_read();};
   return lu;
+}
+
+char table[128] = "##1234567890-=#\tqwertyuiop[]\n#asdfghjkl;\'`#\\zxcvbnm,./#*# #####";
+
+char scancode_to_char(uint8_t o)
+{
+return table[o];
 }

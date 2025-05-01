@@ -11,7 +11,7 @@ void kernel_main(char* multiboot_struct) {
         fb_writeat ("alergh", 6, 512, 304, FB_RED);
 	while(1)
           {
-            fb_putchar(keyboard_read());
+            fb_putchar(scancode_to_char(keyboard_read()));
             
           };
         fb_writeat ("alergh", 6, 512, 336, FB_RED);
