@@ -178,7 +178,7 @@ void fb_scroll (void) {
 		pos = linebeg;
 	};
 
-	fillrect (FB_HEIGHT - 16, 0, FB_WIDTH, 16, fb_bg_color);
+	fillrect (0, FB_HEIGHT-16, FB_WIDTH, 16, fb_bg_color);
 }
 
 void fb_putchar (char c) {
