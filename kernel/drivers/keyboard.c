@@ -12,7 +12,7 @@ static inline uint8_t inb(uint16_t port)
 }
 
 
-uint16_t KEYBD = (uint16_t*) 0x60;
+uint16_t KEYBD = (uint16_t) 0x60;
 uint8_t keyboard_read(void)
 {
   uint8_t lu = inb(KEYBD);
