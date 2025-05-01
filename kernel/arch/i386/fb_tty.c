@@ -80,7 +80,7 @@ void read_multiboot_struct (char* multiboot_struct) {
        	FB_WIDTH = *(uint32_t*) (multiboot_struct + index + 20);
 	FB_MAX_COLUMN = FB_WIDTH >> 3;
 	FB_HEIGHT = *(uint32_t*) (multiboot_struct + index + 24);
-	FB_MAX_ROW = FB_WIDTH >> 4;
+	FB_MAX_ROW = FB_HEIGHT >> 4;
 	FB_BPP = multiboot_struct[index + 28] >> 3;
 	FB_TYPE = multiboot_struct[index + 29];
 
