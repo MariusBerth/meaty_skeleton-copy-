@@ -115,6 +115,24 @@ void morpion (void) {
 	base_x = FB_WIDTH / 2;
 	base_y = FB_HEIGHT / 2;
 	draw_grid (base_x, base_y, gridsize);
+
+	uint32_t helpsize = gridsize >> 2;	//paragraphe pour afficher l'aide de controle
+	uint32_t hx = (base_x - 3* helpsize) - 4;
+	uint32_t hy = base_y - 8;		//les décalages constants sont la
+						//car les coordonées des glyphes 
+						//ne sont pas données par le centre
+	draw_grid (hx + 4 , hy + 8, helpsize);
+	uint32_t off = helpsize / 3;
+	fb_writeat ("q", hx - off, hy - off, FB_WHITE);
+	fb_writeat ("w", hx, hy - off, FB_WHITE);
+	fb_writeat ("e", hx + off, hy - off, FB_WHITE);
+	fb_writeat ("a", hx - off, hy, FB_WHITE);
+	fb_writeat ("s", hx, hy, FB_WHITE);
+	fb_writeat ("d", hx + off, hy, FB_WHITE);
+	fb_writeat ("z", hx - off, hy + off, FB_WHITE);
+	fb_writeat ("x", hx, hy + off, FB_WHITE);
+	fb_writeat ("c", hx + off, hy + off, FB_WHITE);
+
 	while (! check_game_end()) {
 		player_turn ();
 	};
