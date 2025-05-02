@@ -13,8 +13,8 @@ static char* FB_ADDR;	//Voir pour rendre ça compatible avec le
 				//fait que l'on peut nous donner un bpp
 				//différent de 32.
 static uint32_t FB_PITCH;
-static uint32_t FB_WIDTH;
-static uint32_t FB_HEIGHT;
+uint32_t FB_WIDTH;
+uint32_t FB_HEIGHT;
 static uint8_t FB_BPP;		//Attention: ici on stockera le nombre
 				//d'octets par pixel, et non le nombre de bits
 static uint8_t FB_TYPE;
@@ -132,6 +132,32 @@ void fillrect (uint32_t x, uint32_t y, const uint32_t w, const uint32_t h,
 	};
 }	
 
+void bresenham_jesken_circle (uint32_t cx, uint32_t cy, uint32_t r, struct color color) {
+	int32_t  t1 = r >> 4;
+	int32_t t2;
+	int32_t x = r;
+	int32_t y = 0;
+	uint32_t truecolor = get_color(color);
+
+	while (x >= y) {
+		put_pixel ( cx + x, cy + y, truecolor);
+		put_pixel ( cx - x, cy + y, truecolor);
+		put_pixel ( cx + x, cy - y, truecolor);
+		put_pixel ( cx - x, cy - y, truecolor);
+		put_pixel ( cx + y, cy + x, truecolor);
+		put_pixel ( cx - y, cy + x, truecolor);
+		put_pixel ( cx + y, cy - x, truecolor);
+		put_pixel ( cx - y, cy - x, truecolor);
+		y++ ;
+		t1 += y;
+		t2 = t1 - x;
+		if (t2 >= 0) {
+			t1 = t2;
+			x--;
+		};
+	};
+}
+
 void fb_terminal_setup (void) {
 	fb_term_row = 0;
 	fb_term_column = 0;
@@ -201,22 +227,22 @@ void fb_write (char* str, size_t size) {
 	};
 }
 
-void fb_writeat (char* str, size_t size, uint32_t x, uint32_t y,
+void fb_writeat (char* str, uint32_t x, uint32_t y,
 	       	struct color color) {
-	for (uint32_t i = 0; i < size; i++) {
+	char data = *str;
+	while (data != 0x00) {
 		if (x + 8 >= FB_WIDTH) {
 			x = 0;
 			if (y + 16 >= FB_HEIGHT) {
 				y = 0;
 			};
 		};
-		fb_putentryat (x, y, color, str[i]);
+		fb_putentryat (x, y, color, data);
 		x += 8;
+		str++;
+		data = *str;
 	};
 }
-
-			       
-
 
 void fb_writestring (char* str) {
 	unsigned char data = *str;
@@ -227,6 +253,10 @@ void fb_writestring (char* str) {
 		data = *str;
 	};
 }
+
+											  
+
+		
 
 
 void framebuffer_initialize (char* multiboot_struct) {

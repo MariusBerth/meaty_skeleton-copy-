@@ -9,8 +9,8 @@
 .set FB_TYPE, 5			# 5 is the tag type for framebuffer (see multiboot 1.6 spec for details)
 .set FB_FLAGS, 0		# framebuffer setup is not optional
 .set FB_SIZE, 20 		# size of the framebuffer tag in bytes
-.set FB_WIDTH, 1024		# width (in pixels) of the wanted display
-.set FB_HEIGHT, 768 		# height (in pixels) of the wanted display
+.set FB_WIDTH, 1280		# width (in pixels) of the wanted display
+.set FB_HEIGHT, 720 		# height (in pixels) of the wanted display
 .set FB_DEPTH, 32 		# requested nuber of bits per pixel
 
 # Required end tag

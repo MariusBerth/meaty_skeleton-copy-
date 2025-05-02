@@ -33,11 +33,14 @@ kernel/kernel.o \
 
 DRIVERS=drivers/keyboard.o\
 
+GAMES=games/morpion/morpion.o\
+
 OBJS=\
 $(ARCHDIR)/crti.o \
 $(ARCHDIR)/crtbegin.o \
 $(KERNEL_OBJS) \
 $(DRIVERS) \
+$(GAMES) \
 $(ARCHDIR)/crtend.o \
 $(ARCHDIR)/crtn.o \
 
@@ -48,6 +51,7 @@ $(ARCHDIR)/crti.o \
 $(ARCHDIR)/crtbegin.o \
 $(KERNEL_OBJS) \
 $(DRIVERS) \
+$(GAMES) \
 $(LIBS) \
 $(ARCHDIR)/crtend.o \
 $(ARCHDIR)/crtn.o \

@@ -11,12 +11,16 @@ struct color {
 
 extern struct color FB_RED, FB_GREEN, FB_BLUE, FB_WHITE, FB_BLACK;
 
+extern uint32_t FB_WIDTH, FB_HEIGHT;
+
 uint32_t get_color (struct color color);
 
 void framebuffer_initialize(char* multiboot_struct);
 void put_pixel (uint32_t x, uint32_t y, uint32_t truecolor);
 void fillrect (uint32_t x, uint32_t y, const uint32_t w, const uint32_t h,
 		struct color color_bytes);
+void bresenham_jesken_circle (uint32_t cx, uint32_t cy, 
+		uint32_t r, struct color color);
 
 void fb_terminal_setup (void);
 void fb_putentryat (uint32_t x, uint32_t y, struct color color, 
@@ -24,7 +28,7 @@ void fb_putentryat (uint32_t x, uint32_t y, struct color color,
 void fb_putchar (char c);
 void fb_write (char* str, size_t size);
 void fb_writestring (char* str);
-void fb_writeat (char* str, size_t size, uint32_t x, uint32_t y, 
+void fb_writeat (char* str, uint32_t x, uint32_t y, 
 		struct color color);
 
 #endif
