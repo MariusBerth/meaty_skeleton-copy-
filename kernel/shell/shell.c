@@ -1,7 +1,9 @@
 #include <stdint.h>
+#include <string.h>
 #include <kernel/fb_tty.h>
 #include <drivers/keyboard.h>
-
+#include <games/morpion.h>
+#include <shell/shell.h>
 
 void shell(void)
 {
@@ -16,9 +18,11 @@ while(1)
       {
         if (entree == 14)
           {
-            text[pos--] = 0;
-            //supprimer la derniere entree
-            fb_removechar();
+            if (pos > 0) {
+              text[pos--] = 0;
+              //supprimer la derniere entree
+              fb_removechar();
+            };
           }
         else
           {
@@ -31,7 +35,26 @@ while(1)
           };
       };
     fb_putchar('\n');
+
+    //effectue l'entree
+
+    for(pos=0; !(text[pos] == 0) && !(text[pos] == ' '); pos++);
+    text[pos++] = 0;
+
+    if (!(memcmp("echo",text,5))) {
+      echo(text + pos);
+    }
+    else if (!(memcmp("morpion",text,8))) {
+      morpion();
+    }
+    else if (!(memcmp("clear",text,6))) {
+      fb_terminal_setup();
+    }
+
+    ;
+    /*
     fb_writestring(text);
     fb_putchar('\n');
+    */
   };
 }

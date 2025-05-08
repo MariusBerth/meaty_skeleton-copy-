@@ -35,7 +35,7 @@ DRIVERS=drivers/keyboard.o\
 
 GAMES=games/morpion/morpion.o\
 
-MONSHELL=shell/shell.o \
+MONSHELL=shell/shell.o shell/echo.o\
 
 OBJS=\
 $(ARCHDIR)/crti.o \
