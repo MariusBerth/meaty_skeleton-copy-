@@ -124,3 +124,15 @@ void pciConfigWriteLong(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset,
     outl(CONFIG_ADDRESS, address);
     outl(CONFIG_DATA, data);
 }
+
+uint16_t getVendorID (uint8_t bus, uint8_t slot, uint8_t func) {
+	return pciConfigReadWord (bus, slot, func, 0);
+}
+
+uint16_t getDeviceID (uint8_t bus, uint8_t slot, uint8_t func) {
+	return pciConfigReadWord (bus, slot, func, 0x2);
+}
+
+uint32_t getVendorAndDeviceID (uint8_t bus, uint8_t slot, uint8_t func) {
+	return pciConfigReadLong (bus slot func, 0);
+}
