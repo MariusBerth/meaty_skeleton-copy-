@@ -1,8 +1,9 @@
 #include "keyboard.h"
+#include <kernel/asm_functions.h>
 //#define KEYBD		(uint8_t*) 0x60	/* I/O port for keyboard data */
 
 //https://wiki.osdev.org/Inline_Assembly/Examples#INx
-static inline uint8_t inb(uint16_t port)
+/*static inline uint8_t inb(uint16_t port)
 {
     uint8_t ret;
     __asm__ volatile ( "inb %w1, %b0"
@@ -11,7 +12,7 @@ static inline uint8_t inb(uint16_t port)
                    : "memory");
     return ret;
 }
-
+*/
 
 uint16_t KEYBD = (uint16_t) 0x60;
 uint8_t keyboard_read(void)
