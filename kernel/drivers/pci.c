@@ -134,7 +134,7 @@ uint16_t getDeviceID (uint8_t bus, uint8_t slot, uint8_t func) {
 }
 
 uint32_t getVendorAndDeviceID (uint8_t bus, uint8_t slot, uint8_t func) {
-	return pciConfigReadLong (bus slot func, 0);
+	return pciConfigReadLong (bus, slot, func, 0);
 }
 
 uint16_t findDevice (uint16_t deviceID, uint16_t vendorID) {
@@ -148,9 +148,11 @@ uint16_t findDevice (uint16_t deviceID, uint16_t vendorID) {
 	uint32_t id = (((uint32_t) deviceID) << 16) | (uint32_t) vendorID;
 
 	for (bus = 0; bus < 0x0100; bus++) {
-		for (device; device < 0x10; device++) {
+		for (device = 0; device < 0x10; device++) {
 			if (id == getVendorAndDeviceID (bus, device, 0)) {
+			//if ( getVendorID (bus, device, 0) != (uint16_t) 0xFFFF) {
 				return (((uint16_t) device) << 8) | bus;
+				
 			};
 		};
 	};

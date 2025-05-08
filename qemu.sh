@@ -2,4 +2,4 @@
 set -e
 . ./iso.sh
 
-qemu-system-$(./target-triplet-to-arch.sh $HOST) -cdrom veldos.iso
+qemu-system-$(./target-triplet-to-arch.sh $HOST) -cdrom veldos.iso -device rtl8139
