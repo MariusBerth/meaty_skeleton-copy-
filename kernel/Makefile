@@ -35,12 +35,15 @@ DRIVERS=drivers/keyboard.o\
 
 GAMES=games/morpion/morpion.o\
 
+SHELL=shell/shell.o \
+
 OBJS=\
 $(ARCHDIR)/crti.o \
 $(ARCHDIR)/crtbegin.o \
 $(KERNEL_OBJS) \
 $(DRIVERS) \
 $(GAMES) \
+$(SHELL) \
 $(ARCHDIR)/crtend.o \
 $(ARCHDIR)/crtn.o \
 
@@ -52,6 +55,7 @@ $(ARCHDIR)/crtbegin.o \
 $(KERNEL_OBJS) \
 $(DRIVERS) \
 $(GAMES) \
+$(SHELL) \
 $(LIBS) \
 $(ARCHDIR)/crtend.o \
 $(ARCHDIR)/crtn.o \

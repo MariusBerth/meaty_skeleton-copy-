@@ -26,6 +26,7 @@ void fb_terminal_setup (void);
 void fb_putentryat (uint32_t x, uint32_t y, struct color color, 
 		char c);
 void fb_putchar (char c);
+void fb_removechar (void);
 void fb_write (char* str, size_t size);
 void fb_writestring (char* str);
 void fb_writeat (char* str, uint32_t x, uint32_t y, 

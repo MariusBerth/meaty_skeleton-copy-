@@ -221,6 +221,12 @@ void fb_putchar (char c) {
 	};
 }
 
+void fb_removechar (void) {
+  if (fb_term_column > 0) {
+    fillrect(--fb_term_column << 3, fb_term_row << 4,8,16,fb_bg_color);
+  };
+}
+
 void fb_write (char* str, size_t size) {
 	for (size_t i = 0; i < size; i++) {
 	       fb_putchar (str[i]);
