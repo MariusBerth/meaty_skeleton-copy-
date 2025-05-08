@@ -4,6 +4,7 @@
 #include <drivers/keyboard.h>
 #include <games/morpion.h>
 #include <shell/shell.h>
+#include <drivers/network.h>
 
 void kernel_main(char* multiboot_struct) {
 	framebuffer_initialize(multiboot_struct);
@@ -26,4 +27,5 @@ void kernel_main(char* multiboot_struct) {
           };*/
         /*fb_writeat ("alergh", 512, 336, FB_RED);*/
 	//morpion ();
+	//card_setup ();
 }
