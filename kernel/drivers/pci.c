@@ -136,3 +136,25 @@ uint16_t getDeviceID (uint8_t bus, uint8_t slot, uint8_t func) {
 uint32_t getVendorAndDeviceID (uint8_t bus, uint8_t slot, uint8_t func) {
 	return pciConfigReadLong (bus slot func, 0);
 }
+
+uint16_t findDevice (uint16_t deviceID, uint16_t vendorID) {
+	//Renvoie le bus dans l'octet de poids faible et le slot dans l'octet de poids faible
+	//Une valeur de retour de 0xFFFF indique que l'appareil n'a pas pu être trouvé
+	//(Cela est correct car il n'y a que 32 slots et donc 0xFFFF n'est pas une valeur valide
+	//pour slot, octet) 
+	
+	uint16_t bus;
+	uint8_t device;
+	uint32_t id = (((uint32_t) deviceID) << 16) | (uint32_t) vendorID;
+
+	for (bus = 0; bus < 0x0100; bus++) {
+		for (device; device < 0x10; device++) {
+			if (id == getVendorAndDeviceID (bus, device, 0)) {
+				return (((uint16_t) device) << 8) | bus;
+			};
+		};
+	};
+	return 0xFFFF;
+}
+
+
