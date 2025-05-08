@@ -25,5 +25,5 @@ void kernel_main(char* multiboot_struct) {
               };
           };*/
         /*fb_writeat ("alergh", 512, 336, FB_RED);*/
-	morpion ();
+	//morpion ();
 }

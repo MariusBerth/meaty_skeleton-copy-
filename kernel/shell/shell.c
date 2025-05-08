@@ -50,6 +50,9 @@ while(1)
     else if (!(memcmp("clear",text,6))) {
       fb_terminal_setup();
     }
+    else if (!(memcmp("exit",text,5))) {
+      break;
+    }
     else {
       fb_writestring(text);
       fb_writestring(" : commande introuvable\n");
