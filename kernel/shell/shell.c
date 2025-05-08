@@ -56,7 +56,7 @@ while(1)
     else {
       fb_writestring(text);
       fb_writestring(" : commande introuvable\n");
-      }
+    }
 
     ;
     /*
