@@ -32,9 +32,10 @@ $(KERNEL_ARCH_OBJS) \
 kernel/kernel.o \
 
 DRIVERS=drivers/keyboard.o \
-drivers/pci.o
+drivers/pci.o \
+drivers/network.o \
 
-GAMES=games/morpion/morpion.o\
+GAMES=games/morpion/morpion.o \
 
 OBJS=\
 $(ARCHDIR)/crti.o \
