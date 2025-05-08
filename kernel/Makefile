@@ -31,7 +31,8 @@ KERNEL_OBJS=\
 $(KERNEL_ARCH_OBJS) \
 kernel/kernel.o \
 
-DRIVERS=drivers/keyboard.o\
+DRIVERS=drivers/keyboard.o \
+drivers/pci.o
 
 GAMES=games/morpion/morpion.o\
 
