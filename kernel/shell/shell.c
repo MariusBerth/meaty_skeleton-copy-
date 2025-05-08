@@ -2,6 +2,7 @@
 #include <kernel/fb_tty.h>
 #include <drivers/keyboard.h>
 
+
 void shell(void)
 {
 char text [200];
@@ -26,11 +27,11 @@ while(1)
             text[pos++] = entree;
             text[pos] = 0;
             //afficher l'entree
-            fb_prutchar(entree);
+            fb_putchar(entree);
           };
       };
-    fb_prutchar('\n');
+    fb_putchar('\n');
     fb_writestring(text);
-    fb_prutchar('\n');
+    fb_putchar('\n');
   };
 }
