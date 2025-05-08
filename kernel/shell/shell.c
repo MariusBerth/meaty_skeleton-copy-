@@ -24,7 +24,7 @@ while(1)
               fb_removechar();
             };
           }
-        else
+        else if (pos < 200)
           {
             entree = scancode_to_char(entree);
             //enregistrer l'entrée
@@ -50,6 +50,10 @@ while(1)
     else if (!(memcmp("clear",text,6))) {
       fb_terminal_setup();
     }
+    else {
+      fb_writestring(text);
+      fb_writestring(" : commande introuvable\n");
+      }
 
     ;
     /*
