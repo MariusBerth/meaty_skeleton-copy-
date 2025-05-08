@@ -144,4 +144,6 @@ void morpion (void) {
 	else if (winner & 2) {
 		fb_writestring ("le.a joueur.euse o a gagne");}
 	else fb_writestring ("c'est une egalite");
+        fb_writestring ("\nappuyez sur une touche pour quitter\n");
+        keyboard_read();
 }

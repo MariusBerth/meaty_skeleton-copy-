@@ -46,6 +46,7 @@ while(1)
     }
     else if (!(memcmp("morpion",text,8))) {
       morpion();
+      fb_terminal_setup();
     }
     else if (!(memcmp("clear",text,6))) {
       fb_terminal_setup();
