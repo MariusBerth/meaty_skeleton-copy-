@@ -46,7 +46,7 @@ while(1)
     }
     else if (!(memcmp("morpion",text,8))) {
       morpion();
-      fb_terminal_setup();
+      fb_terminal_clear();
     }
     else if (!(memcmp("set",text,4))) {
       set_color(text + pos);

@@ -26,6 +26,8 @@ void fb_terminal_setup (void);
 void fb_terminal_clear (void);
 void fb_set_font_color(struct color color);
 void fb_set_bg_color(struct color color);
+struct color fb_get_font_color(void);
+struct color fb_get_bg_color(void);
 uint32_t get_fb_row(void);
 void fb_putentryat (uint32_t x, uint32_t y, struct color color, 
 		char c);

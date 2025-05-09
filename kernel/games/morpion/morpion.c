@@ -9,21 +9,24 @@ uint32_t base_y = 360; 	//valeurs de base si problème, ne devraient pas être
 const uint32_t icon_size = 85;	// moitié de la taille des icones de jeux (x et o) en px
 const uint32_t gridsize = 600;
 
+struct color bg_color;
+struct color font_color;
+
 void draw_grid (uint32_t cx,uint32_t  cy, uint32_t size) {
 	// Dessine une grille 3x3 centrée en cx, cy, inscrite dans un
 	// carré de taille sizexsize px
-	fillrect (cx - size / 6, cy - (size >> 1), 1, size, FB_WHITE);
-	fillrect (cx + size / 6, cy - (size >> 1), 1, size, FB_WHITE);
-	fillrect (cx - (size >> 1), cy - size / 6, size, 1, FB_WHITE);
-	fillrect (cx - (size >> 1), cy + size / 6, size, 1, FB_WHITE);
+	fillrect (cx - size / 6, cy - (size >> 1), 1, size, font_color);
+	fillrect (cx + size / 6, cy - (size >> 1), 1, size, font_color);
+	fillrect (cx - (size >> 1), cy - size / 6, size, 1, font_color);
+	fillrect (cx - (size >> 1), cy + size / 6, size, 1, font_color);
 }
 
 void draw_circle (uint32_t cx, uint32_t cy) {
-	bresenham_jesken_circle (cx, cy, icon_size, FB_WHITE);
+	bresenham_jesken_circle (cx, cy, icon_size, font_color);
 }
 
 void draw_cross (uint32_t cx, uint32_t cy) {
-	uint32_t truecolor = get_color (FB_WHITE);
+	uint32_t truecolor = get_color (font_color);
 	uint32_t x;
 	uint32_t boty = cy + icon_size;
 	uint32_t topy = cy - icon_size;
@@ -50,24 +53,24 @@ uint8_t box_num_from_input (uint8_t input) {
 
 void player_turn (void) {
 	static uint8_t current_turn_x;
-	fillrect (0, 0, FB_WIDTH, 16, FB_BLACK);
+	fillrect (0, 0, FB_WIDTH, 16, bg_color);
 	if (current_turn_x) {
-		fb_writeat("Tour du joueur x...", 0, 0, FB_WHITE);
+		fb_writeat("Tour du joueur x...", 0, 0, font_color);
 	}
 	else {
-		fb_writeat("Tour du joueur o...", 0, 0, FB_WHITE);
+		fb_writeat("Tour du joueur o...", 0, 0, font_color);
 	};
 	uint8_t box_num = box_num_from_input (keyboard_read());
 	if ((box_num == 0xFF) | (game_state & (1 << box_num)) |
 		       	(game_state & (1 << (box_num + 16)))) {
 		fb_writeat("Ce coup est invalide, veuillez en choisir un autre.",
-				0, 16, FB_WHITE);
+				0, 16, font_color);
 		box_num = box_num_from_input (keyboard_read());
 		while ((box_num == 0xFF) | (game_state & (1 << box_num)) |
 		       	(game_state & (1 << (box_num + 16)))) {
 			box_num = box_num_from_input (keyboard_read());
 		};
-		fillrect (0, 16, FB_WIDTH, 16, FB_BLACK);
+		fillrect (0, 16, FB_WIDTH, 16, bg_color);
 	};
 
 	uint32_t cx = base_x + ((gridsize / 3) * ((box_num % 3) - 1));
@@ -109,9 +112,13 @@ int8_t check_game_end (void) {
 	
 
 void morpion (void) {
+        bg_color = fb_get_bg_color();
+        font_color = fb_get_font_color();
+
+
 	game_state = 0;
 
-	fillrect (0, 0, FB_WIDTH, FB_HEIGHT, FB_BLACK);
+	fillrect (0, 0, FB_WIDTH, FB_HEIGHT, bg_color);
 	base_x = FB_WIDTH / 2;
 	base_y = FB_HEIGHT / 2;
 	draw_grid (base_x, base_y, gridsize);
@@ -123,20 +130,20 @@ void morpion (void) {
 						//ne sont pas données par le centre
 	draw_grid (hx + 4 , hy + 8, helpsize);
 	uint32_t off = helpsize / 3;
-	fb_writeat ("q", hx - off, hy - off, FB_WHITE);
-	fb_writeat ("w", hx, hy - off, FB_WHITE);
-	fb_writeat ("e", hx + off, hy - off, FB_WHITE);
-	fb_writeat ("a", hx - off, hy, FB_WHITE);
-	fb_writeat ("s", hx, hy, FB_WHITE);
-	fb_writeat ("d", hx + off, hy, FB_WHITE);
-	fb_writeat ("z", hx - off, hy + off, FB_WHITE);
-	fb_writeat ("x", hx, hy + off, FB_WHITE);
-	fb_writeat ("c", hx + off, hy + off, FB_WHITE);
+	fb_writeat ("q", hx - off, hy - off, font_color);
+	fb_writeat ("w", hx, hy - off, font_color);
+	fb_writeat ("e", hx + off, hy - off, font_color);
+	fb_writeat ("a", hx - off, hy, font_color);
+	fb_writeat ("s", hx, hy, font_color);
+	fb_writeat ("d", hx + off, hy, font_color);
+	fb_writeat ("z", hx - off, hy + off, font_color);
+	fb_writeat ("x", hx, hy + off, font_color);
+	fb_writeat ("c", hx + off, hy + off, font_color);
 
 	while (! check_game_end()) {
 		player_turn ();
 	};
-	fillrect (0, 0, FB_WIDTH, 16, FB_BLACK);
+	fillrect (0, 0, FB_WIDTH, 16, bg_color);
 	fb_writestring ("partie finie, ");
 	int8_t winner = check_game_end ();
 	if (winner & 1) {
