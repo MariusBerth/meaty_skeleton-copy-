@@ -52,6 +52,9 @@ while(1)
       set_color(text + pos);
     }
     else if (!(memcmp("clear",text,6))) {
+      fb_terminal_clear();
+    }
+    else if (!(memcmp("clean",text,6))) {
       fb_terminal_setup();
     }
     else if (!(memcmp("exit",text,5))) {

@@ -34,7 +34,12 @@ void set_color(char * arg){
     return;
   };
 
-  if (c) {fb_set_font_color(color);}
-  else {fb_set_bg_color(color);};
-
+  if (c) {
+    fb_set_font_color(color);
+  }
+  else {
+    fb_set_bg_color(color);
+    uint32_t rang = (get_fb_row()) << 4;
+    fillrect(0, rang, FB_WIDTH, FB_HEIGHT - rang, color);
+  };
 }

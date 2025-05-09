@@ -158,12 +158,16 @@ void bresenham_jesken_circle (uint32_t cx, uint32_t cy, uint32_t r, struct color
 	};
 }
 
-void fb_terminal_setup (void) {
+void fb_terminal_clear (void) {
 	fb_term_row = 0;
 	fb_term_column = 0;
+	fillrect (0, 0, FB_WIDTH, FB_HEIGHT, fb_bg_color/*FB_BLACK*/);
+}
+
+void fb_terminal_setup (void) {
 	fb_font_color = FB_WHITE;
 	fb_bg_color = FB_BLACK;
-	fillrect (0, 0, FB_WIDTH, FB_HEIGHT, fb_bg_color/*FB_BLACK*/);
+        fb_terminal_clear();
 }
 
 void fb_set_font_color(struct color color) {
@@ -171,6 +175,10 @@ void fb_set_font_color(struct color color) {
 }
 void fb_set_bg_color(struct color color) {
   fb_bg_color = color;
+}
+
+uint32_t get_fb_row(void){
+  return fb_term_row;
 }
 
 void fb_putentryat (uint32_t x, uint32_t y, struct color color, char c) {
