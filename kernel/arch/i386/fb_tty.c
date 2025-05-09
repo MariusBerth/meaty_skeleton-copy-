@@ -38,6 +38,15 @@ struct color FB_GREEN = { 0, 255, 0 };
 struct color FB_BLUE = { 0, 0, 255 };
 struct color FB_WHITE = { 255, 255, 255 };
 struct color FB_BLACK = { 0, 0, 0 };
+struct color FB_GREY = { 127, 127, 127 };
+
+struct color FB_DARK_RED = { 127, 0, 0 };
+struct color FB_DARK_GREEN = { 0, 127, 0 };
+struct color FB_DARK_BLUE = { 0, 0, 127 };
+struct color FB_MAGENTA = { 255, 0, 255 };
+struct color FB_YELLOW = { 255, 255, 0 };
+struct color FB_CYAN = { 0, 255, 255 };
+
 
 uint32_t get_color ( struct color color ) {
 	uint32_t red_masked = color.r & ((1 << FB_RED_MASKSIZE) - 1);

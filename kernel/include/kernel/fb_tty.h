@@ -9,7 +9,9 @@ struct color {
 	uint8_t b;
 };
 
-extern struct color FB_RED, FB_GREEN, FB_BLUE, FB_WHITE, FB_BLACK;
+extern struct color FB_RED, FB_GREEN, FB_BLUE, FB_WHITE, FB_BLACK, FB_GREY;
+extern struct color FB_DARK_RED, FB_DARK_GREEN, FB_DARK_BLUE;
+extern struct color FB_MAGENTA, FB_YELLOW, FB_CYAN;
 
 extern uint32_t FB_WIDTH, FB_HEIGHT;
 
