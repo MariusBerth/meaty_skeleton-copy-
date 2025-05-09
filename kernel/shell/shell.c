@@ -60,12 +60,21 @@ while(1)
     else if (!(memcmp("exit",text,5))) {
       break;
     }
+    else if (!(memcmp("help",text,5))) {
+      fb_writestring("liste des commandes :\n");
+      fb_writestring("- echo : recopie ce qui est fourni en argument\n");
+      fb_writestring("- morpion : lance un morpion\n");
+      fb_writestring("- set : permet de changer les couleurs de la police (f) et du fond (b)\n");
+      fb_writestring("- clear : efface tout ce qui est ecrit\n");
+      fb_writestring("- clean : comme clean, mais reinitialise aussi les couleurs\n");
+      fb_writestring("- exit : sort du shell\n");
+      fb_writestring("- help : affiche cette page\n");
+    }
     else {
       fb_writestring(text);
       fb_writestring(" : commande introuvable\n");
-    }
+    };
 
-    ;
     /*
     fb_writestring(text);
     fb_putchar('\n');
