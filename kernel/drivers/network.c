@@ -28,4 +28,6 @@ void card_setup (void) {
 	ioaddr = (pciConfigReadLong (bus, device, 0, 0x10)) & 0xFFFFFFFC;
 
 	outb( ioaddr + 0x52, 0x0);
+	outb( ioaddr + 0x37, 0x10);
+ 	while( (inb(ioaddr + 0x37) & 0x10) != 0) { }
 }
