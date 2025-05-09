@@ -210,8 +210,9 @@ void fb_scroll (void) {
 
 void fb_putchar (char c) {
 	if (c != '\n') {
-		fb_putentryat (fb_term_column << 3, fb_term_row << 4, fb_font_color,
-				c);
+          fillrect(fb_term_column << 3, fb_term_row << 4,8,16,fb_bg_color);
+          fb_putentryat (fb_term_column << 3, fb_term_row << 4, fb_font_color,
+                         c);
 	};
 	if (++fb_term_column == FB_MAX_COLUMN || c == '\n') {
 		fb_term_column = 0;
@@ -261,9 +262,6 @@ void fb_writestring (char* str) {
 	};
 }
 
-											  
-
-		
 
 
 void framebuffer_initialize (char* multiboot_struct) {
