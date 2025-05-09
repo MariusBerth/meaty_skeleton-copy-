@@ -50,6 +50,21 @@ void set_color(char * arg){
   else if (!(memcmp("cyan",argsuiv,5))) {
     color=FB_CYAN;
   }
+  else if (!(memcmp("rgb ",argsuiv,4))) {
+    char* p = argsuiv+4;
+    int i=0;
+    while (p[++i] != ',');
+    p[i]=0;
+    int vr = str_to_int(p);
+    p+=(i+1);
+    i=0;
+    while (p[++i] != ',');
+    p[i]=0;
+    int vg = str_to_int(p);
+    p+=(i+1);
+    int vb = str_to_int(p);
+    color=(struct color) {vr,vg,vb};
+  }
   else {
     fb_writestring("couleur non reconnue\n");
     return;

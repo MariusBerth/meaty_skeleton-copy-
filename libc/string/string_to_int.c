@@ -2,7 +2,7 @@
 
 int str_to_int(char* i) {
   int r=0;
-  while(*i != 0){
+  while((*i != 0)){
     if (*i=='1'){r=10*r+1;}
     else if (*i=='2'){r=10*r+2;}
     else if (*i=='3'){r=10*r+3;}
