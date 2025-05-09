@@ -176,6 +176,12 @@ void fb_set_font_color(struct color color) {
 void fb_set_bg_color(struct color color) {
   fb_bg_color = color;
 }
+struct color fb_get_font_color(void){
+  return fb_font_color;
+}
+struct color fb_get_bg_color(void){
+  return fb_bg_color;
+}
 
 uint32_t get_fb_row(void){
   return fb_term_row;
