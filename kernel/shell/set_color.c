@@ -29,6 +29,9 @@ void set_color(char * arg){
   else if (!(memcmp("green",argsuiv,6))) {
     color=FB_GREEN;
   }
+  else if (!(memcmp("grey",argsuiv,5))) {
+    color=FB_GREY;
+  }
   else {
     fb_writestring("couleur non reconnue\n");
     return;
