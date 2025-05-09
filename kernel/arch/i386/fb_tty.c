@@ -63,7 +63,7 @@ void read_multiboot_struct (char* multiboot_struct) {
 	//valeurs. Normalement c'est bon dans cette fontion
 	const uint32_t struct_size = *(uint32_t*)multiboot_struct;
 	uint32_t index = 8;
-	
+
 	while ( index < struct_size && *(uint32_t*) (multiboot_struct + index) != 8 ) {
 		index = index + *(uint32_t*) (multiboot_struct + index + 4);
 		index = (uint32_t) (index + (8 - 1)) & -8;
@@ -84,15 +84,15 @@ void read_multiboot_struct (char* multiboot_struct) {
 	FB_BPP = multiboot_struct[index + 28] >> 3;
 	FB_TYPE = multiboot_struct[index + 29];
 
-	uint32_t col_info = index + 32;		//La spec multiboot2 n'est pas réspéctée par GRUB, 
+	uint32_t col_info = index + 32;		//La spec multiboot2 n'est pas réspéctée par GRUB,
 						//les infos de couleurs devraient être
 						//à la position index+31 mais le champ réservé situé juste avant
 						//est un uint16 dans l'implémentation de GRUB alors que c'est un
 						//uint8 dans la spécification
 	if (FB_TYPE == 1) {
 		FB_RED_FIELDPOS = *(uint8_t*) (multiboot_struct + col_info);
-                FB_RED_MASKSIZE = *(uint8_t*) (multiboot_struct + col_info + 1);	
-                FB_GREEN_FIELDPOS = multiboot_struct[col_info+2]; 
+                FB_RED_MASKSIZE = *(uint8_t*) (multiboot_struct + col_info + 1);
+                FB_GREEN_FIELDPOS = multiboot_struct[col_info+2];
                 FB_GREEN_MASKSIZE = multiboot_struct[col_info+3];
                 FB_BLUE_FIELDPOS = multiboot_struct[col_info+4];
                 FB_BLUE_MASKSIZE = multiboot_struct[col_info+5];
@@ -101,7 +101,7 @@ void read_multiboot_struct (char* multiboot_struct) {
 
 void put_pixel (uint32_t x, uint32_t y, uint32_t truecolor) {
 	uint32_t location = y * FB_PITCH + x * FB_BPP; 
-	
+
 	*(uint32_t*)(FB_ADDR + location) = truecolor;	//Tel qu'écrit, comme FB_ADDR est un pointeur vers uint32_t,
 					//les offsets sont exprimés en long (donc un offset de 1 fait 4 octets)
 					//Update: corrigé
@@ -130,7 +130,7 @@ void fillrect (uint32_t x, uint32_t y, const uint32_t w, const uint32_t h,
 		linebeg += FB_PITCH;
 		pos = linebeg;
 	};
-}	
+}
 
 void bresenham_jesken_circle (uint32_t cx, uint32_t cy, uint32_t r, struct color color) {
 	int32_t  t1 = r >> 4;
@@ -163,7 +163,14 @@ void fb_terminal_setup (void) {
 	fb_term_column = 0;
 	fb_font_color = FB_WHITE;
 	fb_bg_color = FB_BLACK;
-	fillrect (0, 0, FB_WIDTH, FB_HEIGHT, FB_BLACK);
+	fillrect (0, 0, FB_WIDTH, FB_HEIGHT, fb_bg_color/*FB_BLACK*/);
+}
+
+void fb_set_font_color(struct color color) {
+  fb_font_color = color;
+}
+void fb_set_bg_color(struct color color) {
+  fb_bg_color = color;
 }
 
 void fb_putentryat (uint32_t x, uint32_t y, struct color color, char c) {

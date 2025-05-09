@@ -37,7 +37,7 @@ drivers/network.o \
 
 GAMES=games/morpion/morpion.o \
 
-MONSHELL=shell/shell.o shell/echo.o\
+MONSHELL=shell/shell.o shell/echo.o shell/set_color.o\
 
 OBJS=\
 $(ARCHDIR)/crti.o \

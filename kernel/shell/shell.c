@@ -48,6 +48,9 @@ while(1)
       morpion();
       fb_terminal_setup();
     }
+    else if (!(memcmp("set",text,4))) {
+      set_color(text + pos);
+    }
     else if (!(memcmp("clear",text,6))) {
       fb_terminal_setup();
     }

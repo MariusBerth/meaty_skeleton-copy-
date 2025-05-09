@@ -23,6 +23,8 @@ void bresenham_jesken_circle (uint32_t cx, uint32_t cy,
 		uint32_t r, struct color color);
 
 void fb_terminal_setup (void);
+void fb_set_font_color(struct color color);
+void fb_set_bg_color(struct color color);
 void fb_putentryat (uint32_t x, uint32_t y, struct color color, 
 		char c);
 void fb_putchar (char c);
