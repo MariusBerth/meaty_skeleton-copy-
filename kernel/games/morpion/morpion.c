@@ -118,8 +118,9 @@ void morpion (void) {
 
 	game_state = 0;
 
-	fillrect (0, 0, FB_WIDTH, FB_HEIGHT, bg_color);
-	base_x = FB_WIDTH / 2;
+	//fillrect (0, 0, FB_WIDTH, FB_HEIGHT, bg_color);
+	fb_terminal_clear();
+        base_x = FB_WIDTH / 2;
 	base_y = FB_HEIGHT / 2;
 	draw_grid (base_x, base_y, gridsize);
 
