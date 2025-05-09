@@ -32,6 +32,24 @@ void set_color(char * arg){
   else if (!(memcmp("grey",argsuiv,5))) {
     color=FB_GREY;
   }
+  else if (!(memcmp("dark red",argsuiv,9))) {
+    color=FB_DARK_RED;
+  }
+  else if (!(memcmp("dark green",argsuiv,11))) {
+    color=FB_DARK_GREEN;
+  }
+  else if (!(memcmp("dark blue",argsuiv,10))) {
+    color=FB_DARK_BLUE;
+  }
+  else if (!(memcmp("magenta",argsuiv,8))) {
+    color=FB_MAGENTA;
+  }
+  else if (!(memcmp("yellow",argsuiv,7))) {
+    color=FB_YELLOW;
+  }
+  else if (!(memcmp("cyan",argsuiv,5))) {
+    color=FB_CYAN;
+  }
   else {
     fb_writestring("couleur non reconnue\n");
     return;
