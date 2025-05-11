@@ -8,6 +8,8 @@
 uint16_t DEVICE_ID = 0x8139;
 uint16_t VENDOR_ID = 0x10EC;
 
+char rx_buffer[9708];
+
 uint8_t device;
 uint8_t bus;
 
@@ -30,4 +32,9 @@ void card_setup (void) {
 	outb( ioaddr + 0x52, 0x0);
 	outb( ioaddr + 0x37, 0x10);
  	while( (inb(ioaddr + 0x37) & 0x10) != 0) { }
+
+	outportd(ioaddr + 0x30, (uintptr_t)rx_buffer); // send uint32_t memory location to RBSTART (0x30)
+	
+	outportl(ioaddr + 0x44, 0xf | (1 << 7)); // (1 << 7) is the WRAP bit, 0xf is AB+AM+APM+AAP
+						 // Pour savoir quels paquets accepter
 }
