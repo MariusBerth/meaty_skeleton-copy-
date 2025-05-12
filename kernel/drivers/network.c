@@ -30,7 +30,7 @@
 #include <kernel/asm_functions.h>
 
 #define TX_BUF_SIZE 1514
-#define TX_DESC_MOD 16
+#define TX_DESC_NUM_MOD 16
 #define TX_FIFO_THRESH 256
 #define RX_BUF_LEN_IDX 0	/* 0, 1, 2 is allowed - 8,16,32K rx buffer */
 #define RX_BUF_LEN_MOD (8192 << RX_BUF_LEN_IDX)
@@ -115,7 +115,7 @@ void card_setup (void) {
 	cur_tx = 0;
 }
 
-static int rtl_transmit(volatile void*packet, size_t length) {
+int rtl_transmit(volatile void*packet, size_t length) {
 	uint16_t status;
         uint32_t txstatus;
 	size_t len = length;
@@ -141,5 +141,18 @@ static int rtl_transmit(volatile void*packet, size_t length) {
 	};
 
 	txstatus = inl(ioaddr + TxStatus0 + cur_tx);
+
+	if (status & TxOK) {
+		cur_tx = (cur_tx + 4) % TX_DESC_NUM_MOD;
+		fb_writestring ("l'envoi du packet a reussi\n");
+		
+		return length; }
+	else {
+		fb_writestring ("L'envoi du paquet a raté, réinitialisation de\
+				la carte réseau\n");
+		card_setup ();
+		return 0;	// On supposera que personne n'essayera d'envoyer un paquet
+				// de taille 0 ainsi un retour de 0 signifie une erreur.
+	};
 }
 
