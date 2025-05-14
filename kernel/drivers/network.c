@@ -37,6 +37,7 @@
 #define RX_BUF_LEN (RX_BUF_LEN_MOD + 1500)
 
 #define ETH_ZLEN 60
+#define ETH_FRAME_LEN 1514
 
 enum RTL8139_registers {
 	MAC0=0,			/* Ethernet hardware address. */
@@ -74,6 +75,16 @@ enum IntrStatusBits {
 	TxErr=0x08, TxOK=0x04, RxErr=0x02, RxOK=0x01,
 };
 
+enum ChipCmdBits {
+	CmdReset=0x10, CmdRxEnb=0x08, CmdTxEnb=0x04, RxBufEmpty=0x01, 
+};
+
+enum RxStatusBits {
+	RxMulticast=0x8000, RxPhysical=0x4000, RxBroadcast=0x2000,
+	RxBadSymbol=0x0020, RxRunt=0x0010, RxTooLong=0x0008, RxCRCErr=0x0004,
+	RxBadAlign=0x0002, RxStatusOK=0x0001,
+};
+
 #define DEVICE_ID 0x8139
 #define VENDOR_ID 0x10EC
 
@@ -83,7 +94,8 @@ static unsigned char rx_ring[RX_BUF_LEN+16] __attribute__((aligned(4)));
 static uint8_t device;
 static uint8_t bus;
 
-static int cur_tx;
+static uint32_t cur_tx;
+static uint32_t cur_rx;
 
 static uint32_t ioaddr;
 
@@ -97,7 +109,7 @@ void card_setup (void) {
 	device = (uint8_t) (device_bus >> 8);
 
 	uint16_t cmd_reg_pci = pciConfigReadWord (bus, device, 0, 0x04);
-	pciConfigWriteWord (bus, device, 0, 0x04, cmd_reg_pci | 0x02);
+	pciConfigWriteWord (bus, device, 0, 0x04, cmd_reg_pci | 0x04);
 
 	ioaddr = (pciConfigReadLong (bus, device, 0, 0x10)) & 0xFFFFFFFC;
 
@@ -105,7 +117,7 @@ void card_setup (void) {
 	outb( ioaddr + ChipCmd, 0x10);
  	while( (inb(ioaddr + ChipCmd) & 0x10) != 0) { }
 
-	outl(ioaddr + RxBuf, (uintptr_t)rx_ring); // send uint32_t memory location to RBSTART (0x30)
+	outl(ioaddr + RxBuf, (uint32_t)rx_ring); // on envoie la position du buffer à la carte 
 	
 	outw(ioaddr + IntrMask, 0x0000); 	//La carte réseau ne pourra pas reçevoir d'interrupts
 	outl(ioaddr + RxConfig, 0xf | (1 << 7)); 	// (1 << 7) is the WRAP bit, 0xf is AB+AM+APM+AAP
@@ -113,6 +125,14 @@ void card_setup (void) {
 	outb(ioaddr + ChipCmd, 0x0C);		// Sets the RE and TE bits high
 	
 	cur_tx = 0;
+	cur_rx = 0;
+	/*fb_writestring ("position du buffer dans la carte: ");
+	fb_writelong (inl(ioaddr + RxBuf));
+	fb_writestring ("\nposition de la tete d'ecriture de la carte: ");
+	fb_writelong (inl(ioaddr + RxBufPtr));
+	fb_writestring ("\nposition du buffer dans le code: ");
+	fb_writelong ((uint32_t) rx_ring);
+	fb_putchar ('\n');*/
 }
 
 int rtl_transmit(volatile void*packet, size_t length) {
@@ -144,7 +164,7 @@ int rtl_transmit(volatile void*packet, size_t length) {
 
 	if (status & TxOK) {
 		cur_tx = (cur_tx + 4) % TX_DESC_NUM_MOD;
-		fb_writestring ("l'envoi du packet a reussi\n");
+		//fb_writestring ("l'envoi du packet a reussi\n");
 		
 		return length; }
 	else {
@@ -155,4 +175,65 @@ int rtl_transmit(volatile void*packet, size_t length) {
 				// de taille 0 ainsi un retour de 0 signifie une erreur.
 	};
 }
+
+int rtl_poll (volatile void* DstBuf) {
+	//Le pointeur de destination doit faire au moins 1514 de taille
+	uint32_t status;
+	uint32_t rx_size, rx_status;
+	uint32_t length;
+
+	if (inb(ioaddr + ChipCmd) & RxBufEmpty) {
+		fb_writestring ("aucun paquet recu\n");
+		return 0;
+	}
+	
+	status = inw(ioaddr + IntrStatus);
+	/* See below for the rest of the interrupt acknowledges.  */
+	outw(ioaddr + IntrStatus, status & ~(RxFIFOOver | RxOverflow | RxOK));
+
+	rx_status = *(uint32_t*) (rx_ring + cur_rx);
+	rx_size = rx_status >> 16;
+	rx_status &= 0xFFFF;
+
+
+	if ((rx_status & (RxBadSymbol|RxRunt|RxTooLong|RxCRCErr|RxBadAlign)) ||
+	    (rx_size < ETH_ZLEN) || (rx_size > ETH_FRAME_LEN + 4)) {
+		fb_writestring("erreur dans la reception d'un paquet, reinitialisation de la carte\nstatut:");
+		fb_writeword ((uint16_t)status);
+		fb_writestring ("\ntaille:");
+		fb_writeword (rx_size);
+		fb_putchar ('\n');
+		int i;
+		for (i=0; i<RX_BUF_LEN; i++){
+			if (rx_ring[i]) {
+				fb_writestring ("information trouvee dans le buffer de reception");
+			};
+		};
+		card_setup (); /* this clears all interrupts still pending */
+		return 0;
+	};
+
+	if (!(rx_status & RxStatusOK)) {
+		fb_writestring("erreur dans la reception d'un paquet, reinitialisation de la carte\n");
+		card_setup (); /* this clears all interrupts still pending */
+		return 0;
+	};
+
+	//A partir d'ici, un paquet a bien été recu
+	length = rx_size - 4;	//On ignore la checksum
+	
+	//pas besoin de faire de distinction car les paquets sont écrits continuements
+	//quitte à dépasser le buffer en anneau
+	volatile_memcpy(DstBuf, (rx_ring + cur_rx + 4), length);
+	
+	//fb_writestring("paquet recu");
+	
+	cur_rx = ((cur_rx + rx_size + 4 + 3) & ~3) % RX_BUF_LEN_MOD;
+	outw(ioaddr + RxBufPtr, cur_rx - 16);
+	/* See RTL8139 Programming Guide V0.1 for the official handling of
+	 * Rx overflow situations.  The document itself contains basically no
+	 * usable information, except for a few exception handling rules.  */
+	outw(ioaddr + IntrStatus, status & (RxFIFOOver | RxOverflow | RxOK));
+	return length;
+};
 

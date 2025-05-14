@@ -65,6 +65,12 @@ while(1)
     else if (!(memcmp("exit",text,5))) {
       break;
     }
+    else if (!(memcmp("send",text,5))) {
+      send (text + pos);
+    }
+    else if (!(memcmp("receive",text,8))) {
+      receive ();
+    }
     else if (!(memcmp("help",text,5))) {
       fb_writestring("liste des commandes :\n");
       fb_writestring("- echo : recopie ce qui est fourni en argument\n");

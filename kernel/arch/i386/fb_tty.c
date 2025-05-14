@@ -300,7 +300,29 @@ void fb_writestring (char* str) {
 	};
 }
 
+void fb_writeword (uint16_t n) {
+	int i;
+	for (i=15; i >= 0; i--) {
+		if (n & (1 << i)) {
+			fb_putchar ('1');
+		}
+		else {
+			fb_putchar ('0');
+		};
+	};
+}
 
+void fb_writelong (uint32_t n) {
+	int i;
+	for (i=31; i >= 0; i--) {
+		if (n & (1 << i)) {
+			fb_putchar ('1');
+		}
+		else {
+			fb_putchar ('0');
+		};
+	};
+}
 
 void framebuffer_initialize (char* multiboot_struct) {
 	read_multiboot_struct (multiboot_struct);
