@@ -20,7 +20,7 @@ while(1)
         if (entree == 14)
           {
             if (pos > 0) {
-              text[pos--] = 0;
+              text[--pos] = 0;
               //supprimer la derniere entree
               fb_removecursor();
               fb_removechar();
