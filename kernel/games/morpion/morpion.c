@@ -94,10 +94,10 @@ void player_turn (void) {
 void player_turn_multi (void) {
 	fillrect (0, 0, FB_WIDTH, 16, bg_color);
 	if (current_turn_x) {
-		fb_writeat("Tour du joueur x...", 0, 0, font_color);
+		fb_writeat("Tour du joueur x : a vous de jouer", 0, 0, font_color);
 	}
 	else {
-		fb_writeat("Tour du joueur o...", 0, 0, font_color);
+		fb_writeat("Tour du joueur o : a vous de jouer", 0, 0, font_color);
 	};
 	uint8_t box_num = box_num_from_input (keyboard_read());
 	if ((box_num == 0xFF) | (game_state & (1 << box_num)) |
@@ -133,10 +133,10 @@ void player_turn_multi (void) {
 void other_player_turn (void) {
 	fillrect (0, 0, FB_WIDTH, 16, bg_color);
 	if (current_turn_x) {
-		fb_writeat("Tour du joueur x...", 0, 0, font_color);
+		fb_writeat("Tour du joueur x : en attente de l'adversaire", 0, 0, font_color);
 	}
 	else {
-		fb_writeat("Tour du joueur o...", 0, 0, font_color);
+		fb_writeat("Tour du joueur o : en attente de l'adversaire", 0, 0, font_color);
 	};
 	rtl_poll_wait (morpion_buffer);
 	uint8_t box_num = *(uint8_t*) morpion_buffer;
@@ -278,9 +278,9 @@ void morpion_host (void) {
 	fb_writestring ("partie finie, ");
 	int8_t winner = check_game_end ();
 	if (winner & 1) {
-		fb_writestring ("le.a joueur.euse x a gagne");}
+		fb_writestring (/*"le.a joueur.euse x a gagne"*/"l'adversaire a gagne");}
 	else if (winner & 2) {
-		fb_writestring ("le.a joueur.euse o a gagne");}
+		fb_writestring (/*"le.a joueur.euse o a gagne"*/"vous avez gagne");}
 	else fb_writestring ("c'est une egalite");
         fb_writestring ("\nappuyez sur une touche pour quitter\n");
         keyboard_read();
@@ -302,7 +302,7 @@ void morpion_invite (void) {
 	uint32_t helpsize = gridsize >> 2;	//paragraphe pour afficher l'aide de controle
 	uint32_t hx = (base_x - 3* helpsize) - 4;
 	uint32_t hy = base_y - 8;		//les décalages constants sont la
-						//car les coordonées des glyphes 
+						//car les coordonées des glyphes
 						//ne sont pas données par le centre
 	draw_grid (hx + 4 , hy + 8, helpsize);
 	uint32_t off = helpsize / 3;
@@ -328,9 +328,9 @@ void morpion_invite (void) {
 	fb_writestring ("partie finie, ");
 	int8_t winner = check_game_end ();
 	if (winner & 1) {
-		fb_writestring ("le.a joueur.euse x a gagne");}
+		fb_writestring (/*"le.a joueur.euse x a gagne"*/"vous avez gagne");}
 	else if (winner & 2) {
-		fb_writestring ("le.a joueur.euse o a gagne");}
+		fb_writestring (/*"le.a joueur.euse o a gagne"*/"l'adversaire a gagne");}
 	else fb_writestring ("c'est une egalite");
         fb_writestring ("\nappuyez sur une touche pour quitter\n");
         keyboard_read();
