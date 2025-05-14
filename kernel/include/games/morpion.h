@@ -5,5 +5,7 @@
 #include <kernel/fb_tty.h>
 
 void morpion (void);
+void morpion_hot(void);
+void morpion_invite(void);
 
 #endif

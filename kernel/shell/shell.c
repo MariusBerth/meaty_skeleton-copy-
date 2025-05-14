@@ -53,6 +53,14 @@ while(1)
       morpion();
       fb_terminal_clear();
     }
+    else if (!(memcmp("morpionhost",text,12))) {
+      morpion_host();
+      fb_terminal_clear();
+    }
+    else if (!(memcmp("morpioninvite",text,14))) {
+      morpion_invite();
+      fb_terminal_clear();
+    }
     else if (!(memcmp("set",text,4))) {
       set_color(text + pos);
     }
@@ -75,7 +83,9 @@ while(1)
       fb_writestring("liste des commandes :\n");
       fb_writestring("- echo : recopie ce qui est fourni en argument\n");
       fb_writestring("- morpion : lance un morpion\n");
-      fb_writestring("- set : permet de changer les couleurs de la police (f) et du fond (b)\n");
+      fb_writestring("- morpionhost : lance un morpion en tant qu'hote\n");
+      fb_writestring("- morpioninvite : rejoint le morpion cree par l'autre emulateeur\n");
+      fb_writestring("- set : permet de changer les couleurs de la police (f) et du fond (b) selon des couleurs predefinies ou rgb\n");
       fb_writestring("- clear : efface tout ce qui est ecrit\n");
       fb_writestring("- clean : comme clean, mais reinitialise aussi les couleurs\n");
       fb_writestring("- send : envoie un message a l'autre emulateur\n");
