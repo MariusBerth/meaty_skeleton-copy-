@@ -78,6 +78,8 @@ while(1)
       fb_writestring("- set : permet de changer les couleurs de la police (f) et du fond (b)\n");
       fb_writestring("- clear : efface tout ce qui est ecrit\n");
       fb_writestring("- clean : comme clean, mais reinitialise aussi les couleurs\n");
+      fb_writestring("- send : envoie un message a l'autre emulateur\n");
+      fb_writestring("- recieve : recoit un message de l'autre emulateur\n");
       fb_writestring("- exit : sort du shell\n");
       fb_writestring("- help : affiche cette page\n");
     }
