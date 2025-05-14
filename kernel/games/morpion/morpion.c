@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <kernel/fb_tty.h>
 #include <drivers/keyboard.h>
+#include <drivers/network.h>
 
 uint32_t game_state;
 static uint8_t current_turn_x;
@@ -12,6 +13,8 @@ const uint32_t gridsize = 600;
 
 struct color bg_color;
 struct color font_color;
+
+char morpion_buffer[64];
 
 void draw_grid (uint32_t cx,uint32_t  cy, uint32_t size) {
 	// Dessine une grille 3x3 centrée en cx, cy, inscrite dans un
@@ -88,6 +91,82 @@ void player_turn (void) {
 	current_turn_x = !current_turn_x;
 }
 
+void player_turn_multi (void) {
+	fillrect (0, 0, FB_WIDTH, 16, bg_color);
+	if (current_turn_x) {
+		fb_writeat("Tour du joueur x...", 0, 0, font_color);
+	}
+	else {
+		fb_writeat("Tour du joueur o...", 0, 0, font_color);
+	};
+	uint8_t box_num = box_num_from_input (keyboard_read());
+	if ((box_num == 0xFF) | (game_state & (1 << box_num)) |
+		       	(game_state & (1 << (box_num + 16)))) {
+		fb_writeat("Ce coup est invalide, veuillez en choisir un autre.",
+				0, 16, font_color);
+		box_num = box_num_from_input (keyboard_read());
+		while ((box_num == 0xFF) | (game_state & (1 << box_num)) |
+		       	(game_state & (1 << (box_num + 16)))) {
+			box_num = box_num_from_input (keyboard_read());
+		};
+		fillrect (0, 16, FB_WIDTH, 16, bg_color);
+	};
+
+	((uint8_t*)morpion_buffer)[0] = box_num;
+	rtl_transmit (morpion_buffer, 1);
+
+	uint32_t cx = base_x + ((gridsize / 3) * ((box_num % 3) - 1));
+	uint32_t cy = base_y + ((gridsize / 3) * ((box_num / 3) - 1));
+
+	if (current_turn_x) {
+		draw_cross (cx, cy);
+		game_state |= 0x01 << box_num;
+	}
+	else {
+		draw_circle(cx, cy);
+		game_state |= 0x01 << (box_num + 16);
+	};
+
+	current_turn_x = !current_turn_x;
+}
+
+void other_player_turn (void) {
+	fillrect (0, 0, FB_WIDTH, 16, bg_color);
+	if (current_turn_x) {
+		fb_writeat("Tour du joueur x...", 0, 0, font_color);
+	}
+	else {
+		fb_writeat("Tour du joueur o...", 0, 0, font_color);
+	};
+	rtl_poll_wait (morpion_buffer);
+	uint8_t box_num = *(uint8_t*) morpion_buffer;
+	/*if ((box_num == 0xFF) | (game_state & (1 << box_num)) |
+		       	(game_state & (1 << (box_num + 16)))) {
+		fb_writeat("Ce coup est invalide, veuillez en choisir un autre.",
+				0, 16, font_color);
+		box_num = box_num_from_input (keyboard_read());
+		while ((box_num == 0xFF) | (game_state & (1 << box_num)) |
+		       	(game_state & (1 << (box_num + 16)))) {
+			box_num = box_num_from_input (keyboard_read());
+		};
+		fillrect (0, 16, FB_WIDTH, 16, bg_color);
+	};*/
+
+	uint32_t cx = base_x + ((gridsize / 3) * ((box_num % 3) - 1));
+	uint32_t cy = base_y + ((gridsize / 3) * ((box_num / 3) - 1));
+
+	if (current_turn_x) {
+		draw_cross (cx, cy);
+		game_state |= 0x01 << box_num;
+	}
+	else {
+		draw_circle(cx, cy);
+		game_state |= 0x01 << (box_num + 16);
+	};
+
+	current_turn_x = !current_turn_x;
+}
+
 //les lignes sont 0x07, 0x38, 0x01C0, 0x49, 0x92, 0x0124, 0x0111, 0x54
 int8_t check_game_end (void) {
 	int16_t xbox = (int16_t) game_state;
@@ -112,7 +191,7 @@ int8_t check_game_end (void) {
 	
 
 void morpion (void) {
-	curent_turn_x = 0;
+	current_turn_x = 0;
         bg_color = fb_get_bg_color();
         font_color = fb_get_font_color();
 
@@ -144,6 +223,106 @@ void morpion (void) {
 
 	while (! check_game_end()) {
 		player_turn ();
+	};
+	fillrect (0, 0, FB_WIDTH, 16, bg_color);
+	fb_writestring ("partie finie, ");
+	int8_t winner = check_game_end ();
+	if (winner & 1) {
+		fb_writestring ("le.a joueur.euse x a gagne");}
+	else if (winner & 2) {
+		fb_writestring ("le.a joueur.euse o a gagne");}
+	else fb_writestring ("c'est une egalite");
+        fb_writestring ("\nappuyez sur une touche pour quitter\n");
+        keyboard_read();
+}
+
+void morpion_host (void) {
+	current_turn_x = 0;
+        bg_color = fb_get_bg_color();
+        font_color = fb_get_font_color();
+
+	game_state = 0;
+
+	//fillrect (0, 0, FB_WIDTH, FB_HEIGHT, bg_color);
+	fb_terminal_clear();
+        base_x = FB_WIDTH / 2;
+	base_y = FB_HEIGHT / 2;
+	draw_grid (base_x, base_y, gridsize);
+
+	uint32_t helpsize = gridsize >> 2;	//paragraphe pour afficher l'aide de controle
+	uint32_t hx = (base_x - 3* helpsize) - 4;
+	uint32_t hy = base_y - 8;		//les décalages constants sont la
+						//car les coordonées des glyphes 
+						//ne sont pas données par le centre
+	draw_grid (hx + 4 , hy + 8, helpsize);
+	uint32_t off = helpsize / 3;
+	fb_writeat ("q", hx - off, hy - off, font_color);
+	fb_writeat ("w", hx, hy - off, font_color);
+	fb_writeat ("e", hx + off, hy - off, font_color);
+	fb_writeat ("a", hx - off, hy, font_color);
+	fb_writeat ("s", hx, hy, font_color);
+	fb_writeat ("d", hx + off, hy, font_color);
+	fb_writeat ("z", hx - off, hy + off, font_color);
+	fb_writeat ("x", hx, hy + off, font_color);
+	fb_writeat ("c", hx + off, hy + off, font_color);
+
+	while (! check_game_end()) {
+		if (!current_turn_x) {
+			player_turn_multi ();
+		}
+		else {
+			other_player_turn ();
+		};
+	};
+	fillrect (0, 0, FB_WIDTH, 16, bg_color);
+	fb_writestring ("partie finie, ");
+	int8_t winner = check_game_end ();
+	if (winner & 1) {
+		fb_writestring ("le.a joueur.euse x a gagne");}
+	else if (winner & 2) {
+		fb_writestring ("le.a joueur.euse o a gagne");}
+	else fb_writestring ("c'est une egalite");
+        fb_writestring ("\nappuyez sur une touche pour quitter\n");
+        keyboard_read();
+}
+
+void morpion_invite (void) {
+	current_turn_x = 0;
+        bg_color = fb_get_bg_color();
+        font_color = fb_get_font_color();
+
+	game_state = 0;
+
+	//fillrect (0, 0, FB_WIDTH, FB_HEIGHT, bg_color);
+	fb_terminal_clear();
+        base_x = FB_WIDTH / 2;
+	base_y = FB_HEIGHT / 2;
+	draw_grid (base_x, base_y, gridsize);
+
+	uint32_t helpsize = gridsize >> 2;	//paragraphe pour afficher l'aide de controle
+	uint32_t hx = (base_x - 3* helpsize) - 4;
+	uint32_t hy = base_y - 8;		//les décalages constants sont la
+						//car les coordonées des glyphes 
+						//ne sont pas données par le centre
+	draw_grid (hx + 4 , hy + 8, helpsize);
+	uint32_t off = helpsize / 3;
+	fb_writeat ("q", hx - off, hy - off, font_color);
+	fb_writeat ("w", hx, hy - off, font_color);
+	fb_writeat ("e", hx + off, hy - off, font_color);
+	fb_writeat ("a", hx - off, hy, font_color);
+	fb_writeat ("s", hx, hy, font_color);
+	fb_writeat ("d", hx + off, hy, font_color);
+	fb_writeat ("z", hx - off, hy + off, font_color);
+	fb_writeat ("x", hx, hy + off, font_color);
+	fb_writeat ("c", hx + off, hy + off, font_color);
+
+	while (! check_game_end()) {
+		if (current_turn_x) {
+			player_turn_multi ();
+		}
+		else {
+			other_player_turn ();
+		};
 	};
 	fillrect (0, 0, FB_WIDTH, 16, bg_color);
 	fb_writestring ("partie finie, ");
