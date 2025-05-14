@@ -237,3 +237,60 @@ int rtl_poll (volatile void* DstBuf) {
 	return length;
 };
 
+int rtl_poll_wait (volatile void* DstBuf) {
+	//Le pointeur de destination doit faire au moins 1514 de taille
+	uint32_t status;
+	uint32_t rx_size, rx_status;
+	uint32_t length;
+
+	while (inb(ioaddr + ChipCmd) & RxBufEmpty);
+	
+	status = inw(ioaddr + IntrStatus);
+	/* See below for the rest of the interrupt acknowledges.  */
+	outw(ioaddr + IntrStatus, status & ~(RxFIFOOver | RxOverflow | RxOK));
+
+	rx_status = *(uint32_t*) (rx_ring + cur_rx);
+	rx_size = rx_status >> 16;
+	rx_status &= 0xFFFF;
+
+
+	if ((rx_status & (RxBadSymbol|RxRunt|RxTooLong|RxCRCErr|RxBadAlign)) ||
+	    (rx_size < ETH_ZLEN) || (rx_size > ETH_FRAME_LEN + 4)) {
+		fb_writestring("erreur dans la reception d'un paquet, reinitialisation de la carte\nstatut:");
+		fb_writeword ((uint16_t)status);
+		fb_writestring ("\ntaille:");
+		fb_writeword (rx_size);
+		fb_putchar ('\n');
+		int i;
+		for (i=0; i<RX_BUF_LEN; i++){
+			if (rx_ring[i]) {
+				fb_writestring ("information trouvee dans le buffer de reception");
+			};
+		};
+		card_setup (); /* this clears all interrupts still pending */
+		return 0;
+	};
+
+	if (!(rx_status & RxStatusOK)) {
+		fb_writestring("erreur dans la reception d'un paquet, reinitialisation de la carte\n");
+		card_setup (); /* this clears all interrupts still pending */
+		return 0;
+	};
+
+	//A partir d'ici, un paquet a bien été recu
+	length = rx_size - 4;	//On ignore la checksum
+	
+	//pas besoin de faire de distinction car les paquets sont écrits continuements
+	//quitte à dépasser le buffer en anneau
+	volatile_memcpy(DstBuf, (rx_ring + cur_rx + 4), length);
+	
+	//fb_writestring("paquet recu");
+	
+	cur_rx = ((cur_rx + rx_size + 4 + 3) & ~3) % RX_BUF_LEN_MOD;
+	outw(ioaddr + RxBufPtr, cur_rx - 16);
+	/* See RTL8139 Programming Guide V0.1 for the official handling of
+	 * Rx overflow situations.  The document itself contains basically no
+	 * usable information, except for a few exception handling rules.  */
+	outw(ioaddr + IntrStatus, status & (RxFIFOOver | RxOverflow | RxOK));
+	return length;
+};
