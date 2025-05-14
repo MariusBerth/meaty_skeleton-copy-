@@ -3,6 +3,7 @@
 #include <drivers/keyboard.h>
 
 uint32_t game_state;
+static uint8_t current_turn_x;
 uint32_t base_x = 640;
 uint32_t base_y = 360; 	//valeurs de base si problème, ne devraient pas être
 		       	//utilisées
@@ -52,7 +53,6 @@ uint8_t box_num_from_input (uint8_t input) {
 }
 
 void player_turn (void) {
-	static uint8_t current_turn_x;
 	fillrect (0, 0, FB_WIDTH, 16, bg_color);
 	if (current_turn_x) {
 		fb_writeat("Tour du joueur x...", 0, 0, font_color);
@@ -112,6 +112,7 @@ int8_t check_game_end (void) {
 	
 
 void morpion (void) {
+	curent_turn_x = 0;
         bg_color = fb_get_bg_color();
         font_color = fb_get_font_color();
 
