@@ -33,6 +33,8 @@ struct color fb_get_bg_color(void);
 uint32_t get_fb_row(void);
 void fb_putentryat (uint32_t x, uint32_t y, struct color color, 
 		char c);
+void fb_drawcursor (void);
+void fb_removecursor (void);
 void fb_putchar (char c);
 void fb_removechar (void);
 void fb_write (char* str, size_t size);

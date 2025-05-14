@@ -191,7 +191,6 @@ struct color fb_get_font_color(void){
 struct color fb_get_bg_color(void){
   return fb_bg_color;
 }
-
 uint32_t get_fb_row(void){
   return fb_term_row;
 }
@@ -237,6 +236,15 @@ void fb_scroll (void) {
 
 	fillrect (0, FB_HEIGHT-16, FB_WIDTH, 16, fb_bg_color);
 }
+
+void fb_drawcursor (void) {
+  fillrect(fb_term_column << 3, fb_term_row << 4,8,16,fb_font_color);
+}
+
+void fb_removecursor (void) {
+  fillrect(fb_term_column << 3, fb_term_row << 4,8,16,fb_bg_color);
+}
+
 
 void fb_putchar (char c) {
 	if (c != '\n') {

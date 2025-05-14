@@ -14,6 +14,7 @@ while(1)
     int pos = 0;
     char entree;
     text[0]=0;
+    fb_drawcursor();
     while ((entree = keyboard_read()) != 28 /*'\n'*/)
       {
         if (entree == 14)
@@ -21,7 +22,9 @@ while(1)
             if (pos > 0) {
               text[pos--] = 0;
               //supprimer la derniere entree
+              fb_removecursor();
               fb_removechar();
+              fb_drawcursor();
             };
           }
         else if (pos < 200)
@@ -32,8 +35,10 @@ while(1)
             text[pos] = 0;
             //afficher l'entree
             fb_putchar(entree);
+            fb_drawcursor();
           };
       };
+    fb_removecursor();
     fb_putchar('\n');
 
     //effectue l'entree
